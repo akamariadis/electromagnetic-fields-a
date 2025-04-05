@@ -3,7 +3,7 @@ clc;
 close all;
 
 N = 50;
-h_samples = linspace(0.01, 1, 200);  % h/lambda
+h_samples = linspace(0.01, 1, 200);
 re_sigma = linspace(0, 2, N);
 im_sigma = linspace(-2, 2, N);
 [Re, Im] = meshgrid(re_sigma, im_sigma);
