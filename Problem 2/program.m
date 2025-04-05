@@ -1,6 +1,6 @@
 clear;
-clc;
 close all;
+clc;
 
 N = 50;
 h_samples = linspace(0.01, 1, 200);
