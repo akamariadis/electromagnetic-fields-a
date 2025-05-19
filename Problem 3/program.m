@@ -412,3 +412,79 @@ for k = 1:length(materials)
 end
 
 sgtitle('Contour plots συντελεστή ανάκλασης για TE πόλωση');
+
+clear; clc;
+
+lambda0 = 530e-9;
+h = 1.6 * lambda0;
+z = linspace(-lambda0, h + lambda0, 1000);
+
+n1 = 1.0;
+n3 = 1.5;
+
+n_Ag = 0.13 + 3.98i;
+n_Ti = 2.9 + 3.4i;
+
+E_TM = @(z, n2) compute_E_TM(z, lambda0, h, n1, n2, n3);
+
+E_Ag = E_TM(z, n_Ag);
+E_Ti = E_TM(z, n_Ti);
+
+figure;
+plot(z*1e9, abs(E_Ag), 'b', 'LineWidth',1.5); hold on;
+plot(z*1e9, abs(E_Ti), 'r', 'LineWidth',1.5);
+xline(0, '--k');
+xline(h*1e9, '--k');
+xlabel('z (nm)');
+ylabel('|E(z)|');
+title('Κατανομή |E(z)| TM Πόλωση - Άργυρος (μπλε) & Τιτάνιο (κόκκινο)');
+legend('Ag (καλύτερο)', 'Ti (χειρότερο)');
+grid on;
+
+n_GaP = 3.3 + 0i;
+n_cSi = 3.88 + 0.02i;
+
+E_GaP = E_TM(z, n_GaP);
+E_cSi = E_TM(z, n_cSi);
+
+figure;
+plot(z*1e9, abs(E_GaP), 'b', 'LineWidth',1.5); hold on;
+plot(z*1e9, abs(E_cSi), 'r', 'LineWidth',1.5);
+xline(0, '--k');
+xline(h*1e9, '--k');
+xlabel('z (nm)');
+ylabel('|E(z)|');
+title('Κατανομή |E(z)| TM Πόλωση - GaP (μπλε) & c-Si (κόκκινο)');
+legend('GaP (καλύτερο)', 'c-Si (χειρότερο)');
+grid on;
+
+
+% --- Συνάρτηση υπολογισμού πεδίου TM ---
+function E = compute_E_TM(z, lambda, h, n1, n2, n3)
+    k0 = 2*pi/lambda;
+    theta1 = 0;
+
+    theta2 = asin(n1*sin(theta1)/n2);
+    theta3 = asin(n1*sin(theta1)/n3);
+
+    r12 = (n2*cos(theta1) - n1*cos(theta2)) / (n2*cos(theta1) + n1*cos(theta2));
+    r23 = (n3*cos(theta2) - n2*cos(theta3)) / (n3*cos(theta2) + n2*cos(theta3));
+    delta = k0*n2*cos(theta2)*h;
+
+    r_tot = (r12 + r23*exp(2i*delta)) / (1 + r12*r23*exp(2i*delta));
+    t01 = 1 + r_tot;
+
+    E = zeros(size(z));
+    % z < 0 (αέρας)
+    ind_air = z < 0;
+    E(ind_air) = exp(1i*k0*n1*cos(theta1)*z(ind_air)) + r_tot*exp(-1i*k0*n1*cos(theta1)*z(ind_air));
+    % 0 <= z <= h (στρώμα)
+    ind_layer = (z >= 0) & (z <= h);
+    beta2 = k0*n2*cos(theta2);
+    E(ind_layer) = t01 * (exp(1i*beta2*z(ind_layer)) + r23*exp(1i*beta2*(2*h - z(ind_layer))));
+    % z > h (υπόστρωμα)
+    ind_sub = z > h;
+    t12 = (1 + r23);
+    beta3 = k0*n3*cos(theta3);
+    E(ind_sub) = t01 * t12 * exp(1i*beta3*(z(ind_sub) - h));
+end
