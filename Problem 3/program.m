@@ -286,3 +286,31 @@ ylabel('Γωνία πρόσπτωσης θ (°)');
 title('|R(λ,θ)| για TE Πόλωση - c-Si (h = 0.8λ₀)', 'FontWeight', 'bold');
 colorbar;
 colormap autumn;
+
+clear; clc;
+
+lambda0 = 530e-9;
+h = 1.6 * lambda0;
+z = linspace(-lambda0, h + lambda0, 1000);
+k0 = 2*pi/lambda0;
+
+n1 = 1.0;
+n3 = 1.5;
+
+n_GaP = 3.3 + 0i;
+n_cSi = 3.88 + 0.02i;
+
+compute_Ez = @(n2) compute_field(z, lambda0, h, n1, n2, n3, k0);
+
+E_GaP = compute_Ez(n_GaP);
+E_cSi = compute_Ez(n_cSi);
+
+figure;
+plot(z*1e9, abs(E_GaP), 'b', 'LineWidth', 1.5); hold on;
+plot(z*1e9, abs(E_cSi), 'r', 'LineWidth', 1.5);
+xline(0, '--k'); xline(h*1e9, '--k');
+xlabel('z (nm)');
+ylabel('|E(z)|');
+title('|E(z)| για GaP και c-Si (TE Πόλωση, λ = 530nm, h = 1.6λ₀)');
+legend('GaP', 'c-Si');
+grid on;
