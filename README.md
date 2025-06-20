@@ -1,1 +1,1 @@
-The necessary data for the third problem was obtained from the following website: http://refractiveindex.INFO.
+The necessary data for the third problem were obtained from the following website: http://refractiveindex.INFO.
